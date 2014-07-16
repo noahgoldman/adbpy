@@ -87,4 +87,4 @@ def int_to_hex(num):
         raise ValueError("Maximum message length is 65535, "
                          "value of {} is too long".format(num))
 
-    return "{:04x}".format(num)
+    return "{0:04x}".format(num)
