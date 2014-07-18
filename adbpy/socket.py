@@ -45,21 +45,22 @@ class Socket(object):
             total_sent += sent
 
     def _receive_fixed_length(self, length):
-        buf = bytearray(length)
-        view = memoryview(buf)
-        bytes_left = length
+        data = ''
+        total_received = 0
 
-        while bytes_left:
-            num_read = self.socket.recv_into(view[(length - bytes_left):],
-                                          min(bytes_left, self.MAX_RECV))
-            if num_read == 0:
+        while total_received < length:
+            chunk = self.socket.recv(min(length - total_received,
+                                            self.MAX_RECV)).decode("ascii")
+
+            if chunk == '':
                 self.close()
                 raise RuntimeError("Socket connection dropped, "
                                    "recv failed")
 
-            bytes_left -= num_read
+            data += chunk
+            total_received += len(chunk)
 
-        return buf.decode("ascii")
+        return data
 
     def receive(self):
         # Get the response status
