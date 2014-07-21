@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 import socket
+from contextlib import contextmanager
 
 class Socket(object):
     """Implements the socket protocol for ADB"""
@@ -13,15 +14,28 @@ class Socket(object):
         """Assign the socket"""
         self.address = address
         self.socket = None
+        self.connected = False
+
+    @contextmanager
+    def Connect(self):
+        """
+        Context manager to handle a socket
+        """
+        self.connect()
+        yield
+        self.close()
 
     def connect(self):
         """Connect to the given socket"""
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect(self.address)
+        if not self.connected:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket.connect(self.address)
+            self.connected = True
 
     def close(self):
         """Close the current socket"""
         self.socket.close()
+        self.connected = False
 
     def send(self, data):
         """Send a formatted message to the ADB server"""
@@ -44,7 +58,7 @@ class Socket(object):
                                    "send failed")
             total_sent += sent
 
-    def _receive_fixed_length(self, length):
+    def receive_fixed_length(self, length):
         data = ''
         total_received = 0
 
@@ -64,24 +78,44 @@ class Socket(object):
 
     def receive(self):
         # Get the response status
-        status = self._receive_fixed_length(4)
+        status = self.receive_fixed_length(4)
 
         if status != "OKAY" and status != "FAIL":
             raise SocketError("Socket communication failed: "
                               "the server did not return a valid response")
 
         # Get the length of the incoming data
-        data_length_str = self._receive_fixed_length(4)
+        data_length_str = self.receive_fixed_length(4)
         data_length = int(data_length_str, 16)
 
         # Get the incoming data
-        data = self._receive_fixed_length(data_length)
+        data = self.receive_fixed_length(data_length)
 
         if status != "OKAY":
             raise SocketError("Previous command failed with: " + data)
 
         self.close()
         return data
+
+    def receive_until_end(self):
+        """
+        Reads and blocks until the socket closes
+
+        Used for the "shell" command, where STDOUT and STDERR
+        are just redirected to the terminal with no length
+        """
+        if self.receive_fixed_length(4) != "OKAY":
+            raise SocketError("Socket communication failed: "
+                              "the server did not return a valid response")
+        
+        output = ""
+
+        while True:
+            chunk = self.socket.recv(4096).decode("ascii")
+            if not chunk:
+                return output
+
+            output += chunk
 
 def int_to_hex(num):
     """

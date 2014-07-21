@@ -1,4 +1,4 @@
-from mock import MagicMock
+from mock import MagicMock, patch
 import pytest
 
 from adbpy.adb import Adb
@@ -22,3 +22,9 @@ def test_adb_get_serialno_any(adb):
 def test_adb_get_serialno_serial(adb):
     adb.get_serialno("6097191b")
     adb.socket.send.assert_called_once_with("host-serial:6097191b:get-serialno")
+
+def test_shell(adb):
+    with patch.object(Adb, "setup_target"):
+        adb.shell("ls -l")
+        adb.socket.send.assert_called_once_with("shell:ls -l")
+        adb.setup_target.assert_called_once()

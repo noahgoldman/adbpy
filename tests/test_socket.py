@@ -1,7 +1,9 @@
 from __future__ import unicode_literals
 from functools import reduce
+import random
+import string
 
-from mock import patch, call
+from mock import patch, call, MagicMock
 import pytest
 
 from adbpy.socket import Socket, int_to_hex, SocketError
@@ -65,7 +67,7 @@ def test_receive_fixed_length_full_response(socket):
 
     socket.socket.recv = lambda x: data_to_recv.encode("ascii")
 
-    data = socket._receive_fixed_length(4)
+    data = socket.receive_fixed_length(4)
     assert data_to_recv == data
 
 def test_receive_fixed_length_staggered_response(socket):
@@ -75,7 +77,7 @@ def test_receive_fixed_length_staggered_response(socket):
 
     socket.socket.recv = lambda x: split_data.pop().encode("ascii")
 
-    data = socket._receive_fixed_length(4)
+    data = socket.receive_fixed_length(4)
     assert data_to_recv == data
 
 def test_receive_failed_response(socket):
@@ -83,7 +85,7 @@ def test_receive_failed_response(socket):
     socket.socket.recv = lambda x: responses.pop().encode("ascii")
 
     with pytest.raises(RuntimeError):
-        socket._receive_fixed_length(100)
+        socket.receive_fixed_length(100)
 
 def test_receive_full_respose(socket):
     expected_data = 'hello_respose'
@@ -135,3 +137,12 @@ def test_send(socket):
 
         calls = [call(int_to_hex(len(data))), call(data)]
         send_data_method.assert_has_calls(calls)
+
+def test_receive_until_end(socket):
+    expected_data = ''.join(random.choice(string.ascii_letters) for i in range(1000))
+    socket.socket.set_buffer(expected_data)
+
+    socket.receive_fixed_length = MagicMock(return_value="OKAY")
+
+    data = socket.receive_until_end()
+    assert expected_data == data

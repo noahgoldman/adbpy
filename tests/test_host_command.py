@@ -2,8 +2,8 @@ from adbpy.host_command import get_host_prefix, host_command
 from adbpy import Target
 
 def test_get_host_prefix():
-    assert get_host_prefix(Target.ANY) == Target.ANY
-    assert get_host_prefix(Target.USB) == Target.USB
+    assert get_host_prefix(Target.ANY) == "host:"
+    assert get_host_prefix(Target.USB) == "host-usb:"
 
     assert get_host_prefix("950a8ad5") == "host-serial:950a8ad5:"
 

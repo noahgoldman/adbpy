@@ -1,4 +1,7 @@
 class Target:
-    ANY = "host:"
-    USB = "host-usb:"
-    EMULATOR = "host-local:"
+    ANY = "any"
+    USB = "usb"
+    EMULATOR = "local"
+
+class AdbError(Exception):
+    pass
