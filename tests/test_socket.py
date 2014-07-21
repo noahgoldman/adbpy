@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from __future__ import unicode_literals
 from functools import reduce
 import random
@@ -8,6 +9,7 @@ import pytest
 
 from adbpy.socket import Socket, int_to_hex, SocketError
 from tests.mock_socket import MockSocket
+from .utils import random_ascii
 
 def test_int_to_hex():
     assert int_to_hex(2) == "0002"
@@ -139,7 +141,7 @@ def test_send(socket):
         send_data_method.assert_has_calls(calls)
 
 def test_receive_until_end(socket):
-    expected_data = ''.join(random.choice(string.ascii_letters) for i in range(1000))
+    expected_data = random_ascii(1000)
     socket.socket.set_buffer(expected_data)
 
     socket.receive_fixed_length = MagicMock(return_value="OKAY")

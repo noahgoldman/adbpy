@@ -1,8 +1,12 @@
-import pytest
 import socket
+import random
+
+import pytest
 
 from adbpy.adb import Adb
 from adbpy import Target
+
+from .utils import random_ascii
 
 DEFAULT_ADDRESS = ("localhost", 5037)
 
@@ -33,3 +37,25 @@ class TestAdbFunctional:
     def test_get_serialno(self, adb):
         serialno = adb.get_serialno(Target.ANY)
         assert serialno is not ''
+
+    def test_shell(self, adb):
+        data = "test"
+        assert adb.shell('echo "{0}"'.format(data)) == data + "\r\n"
+
+    def test_forward(self, adb):
+        port1 = "tcp:" + str(random.randint(0, 9999))
+        port2 = "tcp:" + str(random.randint(0, 9999))
+        output = adb.forward(port1, port2)
+        assert output
+
+        output = adb.forward(port1, port2, norebind=True)
+        assert not output
+
+        output = adb.kill_forward(port1) 
+        assert output
+
+        output = adb.kill_forward(port1) 
+        assert not output
+
+        output = adb.kill_forward_all()
+        assert output

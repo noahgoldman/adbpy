@@ -28,3 +28,19 @@ def test_shell(adb):
         adb.shell("ls -l")
         adb.socket.send.assert_called_once_with("shell:ls -l")
         adb.setup_target.assert_called_once()
+
+def test_forward(adb):
+    device_id = "950a8ad5"
+    adb.forward("tcp:6001", "tcp:36001", device_id, norebind=False)
+
+    adb.socket.send.assert_called_once_with("host-serial:950a8ad5:"
+                                            "forward:tcp:6001;"
+                                            "tcp:36001")
+
+def test_forward_rebind(adb):
+    device_id = "950a8ad5"
+    adb.forward("tcp:6001", "tcp:36001", device_id, norebind=True)
+
+    adb.socket.send.assert_called_once_with("host-serial:950a8ad5:"
+                                            "forward:norebind:"
+                                            "tcp:6001;tcp:36001")
