@@ -42,7 +42,7 @@ def test_send_data_normal_response(socket):
 def test_send_data_staggered_response(socket):
     data_sent = [] 
     def send(message):
-        data_sent.append(message[0])
+        data_sent.append(message.decode("ascii")[0])
         return 1
 
     socket.socket.send = send
@@ -63,7 +63,7 @@ def test_send_data_failed_response(socket):
 def test_receive_fixed_length_full_response(socket):
     data_to_recv = "0005"
 
-    socket.socket.recv = lambda x: data_to_recv
+    socket.socket.recv = lambda x: data_to_recv.encode("ascii")
 
     data = socket._receive_fixed_length(4)
     assert data_to_recv == data
@@ -73,14 +73,14 @@ def test_receive_fixed_length_staggered_response(socket):
     split_data = list(data_to_recv)
     split_data.reverse()
 
-    socket.socket.recv = lambda x: split_data.pop()
+    socket.socket.recv = lambda x: split_data.pop().encode("ascii")
 
     data = socket._receive_fixed_length(4)
     assert data_to_recv == data
 
 def test_receive_failed_response(socket):
     responses = ['', 'hi']
-    socket.socket.recv = lambda x: responses.pop()
+    socket.socket.recv = lambda x: responses.pop().encode("ascii")
 
     with pytest.raises(RuntimeError):
         socket._receive_fixed_length(100)
@@ -88,7 +88,7 @@ def test_receive_failed_response(socket):
 def test_receive_full_respose(socket):
     expected_data = 'hello_respose'
     responses = ['OKAY', '000d', expected_data]
-    socket.socket.recv = lambda x: responses.pop(0)
+    socket.socket.recv = lambda x: responses.pop(0).encode("ascii")
 
     data = socket.receive()
 
@@ -105,7 +105,7 @@ def test_receive_staggered_respose(socket):
     expected_data = '950a8ad5\toffline\n6097191b\tdevice\n'
     responses = ['OK', 'AY', int_to_hex(len(expected_data)),
             expected_data[:10], expected_data[10:]]
-    socket.socket.recv = lambda x: responses.pop(0)
+    socket.socket.recv = lambda x: responses.pop(0).encode("ascii")
 
     data = socket.receive()
 
@@ -115,7 +115,7 @@ def test_receive_fail_response(socket):
     expected_data = 'big error'
     responses = ['FA', 'IL', int_to_hex(len(expected_data)),
                  expected_data]
-    socket.socket.recv = lambda x: responses.pop(0)
+    socket.socket.recv = lambda x: responses.pop(0).encode("ascii")
 
     with pytest.raises(SocketError):
         socket.receive()
@@ -123,7 +123,7 @@ def test_receive_fail_response(socket):
 def test_receive_socket_fail_response(socket):
     expected_data = 'big error'
     responses = ['FA', 'IR']
-    socket.socket.recv = lambda x: responses.pop(0)
+    socket.socket.recv = lambda x: responses.pop(0).encode("ascii")
 
     with pytest.raises(SocketError):
         socket.receive()

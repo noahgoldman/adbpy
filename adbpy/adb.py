@@ -8,13 +8,19 @@ class Adb(object):
         self.address = address 
         self.socket = Socket(address)
 
-    def version(self):
+    def command(self, data):
         self.socket.connect()
-        self.socket.send("host:version")
+        self.socket.send(data)
         return self.socket.receive()
 
+    def version(self):
+        return self.command("host:version")
+
     def get_serialno(self, target=Target.ANY):
-        self.socket.connect()
         cmd = host_command(target, "get-serialno")
-        self.socket.send(cmd)
-        return self.socket.receive()
+        return self.command(cmd)
+
+    def shell(self, shell_cmd, target=Target.ANY):
+        cmd = host_command(target, "shell " + shell_cmd)
+        return command(cmd)
+
