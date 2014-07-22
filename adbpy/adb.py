@@ -6,6 +6,12 @@ from adbpy.devices import parse_device_list
 class Adb(object):
 
     def __init__(self, address=None):
+        """
+        Initialize an Adb object
+
+        :param tuple address: The address of the Adb server in the form (host, port).
+                              Defaults to ("localhost", 5037)
+        """
         if address == None:
             # Default address
             address = ("localhost", 5037)
