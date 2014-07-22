@@ -5,6 +5,7 @@ import pytest
 
 from adbpy.adb import Adb
 from adbpy import Target
+from adbpy.adb_process import AdbProcess
 
 from .utils import random_ascii
 
@@ -19,9 +20,19 @@ def adb_active():
 
     return True
 
+def num_devices():
+    a = Adb(DEFAULT_ADDRESS)
+    return len(a.devices())
+
 @pytest.fixture
 def adb():
-    return Adb(DEFAULT_ADDRESS)
+    # Restart ADB
+    adb = Adb(DEFAULT_ADDRESS)
+    adb.kill()
+
+    proc = AdbProcess("adb")
+    proc.start()
+    return adb
 
 @pytest.mark.skipif(not adb_active(), reason="Adb is not running")
 class TestAdbFunctional:
@@ -38,10 +49,12 @@ class TestAdbFunctional:
         serialno = adb.get_serialno(Target.ANY)
         assert serialno is not ''
 
+    @pytest.mark.skipif(num_devices() != 1, reason="Only one device can be present.")
     def test_shell(self, adb):
         data = "test"
         assert adb.shell('echo "{0}"'.format(data)) == data + "\r\n"
 
+    @pytest.mark.skipif(num_devices() != 1, reason="Only one device can be present.")
     def test_forward(self, adb):
         port1 = "tcp:" + str(random.randint(0, 9999))
         port2 = "tcp:" + str(random.randint(0, 9999))

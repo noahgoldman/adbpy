@@ -23,6 +23,18 @@ def test_adb_get_serialno_serial(adb):
     adb.get_serialno("6097191b")
     adb.socket.send.assert_called_once_with("host-serial:6097191b:get-serialno")
 
+def test_adb_get_product(adb):
+    adb.get_product("950a8ad5")
+    adb.socket.send.assert_called_once_with("host-serial:950a8ad5:get-product")
+
+def test_adb_get_devpath(adb):
+    adb.get_devpath(Target.USB)
+    adb.socket.send.assert_called_once_with("host-usb:get-devpath")
+
+def test_adb_get_state(adb):
+    adb.get_state(Target.EMULATOR)
+    adb.socket.send.assert_called_once_with("host-local:get-state")
+
 def test_shell(adb):
     with patch.object(Adb, "setup_target"):
         adb.shell("ls -l")
@@ -44,3 +56,9 @@ def test_forward_rebind(adb):
     adb.socket.send.assert_called_once_with("host-serial:950a8ad5:"
                                             "forward:norebind:"
                                             "tcp:6001;tcp:36001")
+
+def test_devices(adb):
+    adb.socket.receive = MagicMock(return_value="950a8ad5\tdevice\n")
+    output = adb.devices()
+
+    assert output == [("950a8ad5", "device")]
