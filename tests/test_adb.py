@@ -10,6 +10,12 @@ def adb():
     adb.socket = MagicMock()
     return adb
 
+def test_get_transport():
+    assert Adb.get_transport(Target.ANY) == "host:transport-any" 
+    assert Adb.get_transport(Target.USB) == "host:transport-usb" 
+    assert Adb.get_transport(Target.EMULATOR) == "host:transport-local" 
+    assert Adb.get_transport("950a8ad5") == "host:transport:950a8ad5"
+
 def test_adb_version(adb):
     adb.version()
 

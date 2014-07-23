@@ -148,3 +148,22 @@ def test_receive_until_end(socket):
 
     data = socket.receive_until_end()
     assert expected_data == data
+
+def test_receive_until_end_fail(socket):
+    expected_data = random_ascii(1000)
+    socket.socket.set_buffer(expected_data)
+
+    socket.receive_fixed_length = MagicMock(return_value="FAIL")
+
+    with pytest.raises(SocketError):
+        socket.receive_until_end()
+
+def test_receive_until_end_timeout(socket):
+    expected_data = random_ascii(10000)
+    socket.socket.set_buffer(expected_data)
+
+    socket.receive_fixed_length = MagicMock(return_value="OKAY")
+
+    data = socket.receive_until_end(timeout=10)
+    assert expected_data != data
+    assert data in expected_data

@@ -1,9 +1,12 @@
 import random
+import socket
 
 class MockSocket(object):
 
     def __init__(self):
         self.input = ""
+        self.buffer = []
+        self.timeout_set = False
 
     def connect(self):
         self.connected = True
@@ -15,12 +18,22 @@ class MockSocket(object):
         self.input += message
 
     def recv(self, length):
-        return self.buffer.pop(0).encode("ascii")
+        data = self.buffer.pop(0)
+        if data == None:
+            raise socket.timeout
+        else:
+            data = data.encode("ascii")
+        return data
+
+    def settimeout(self, seconds):
+        if not self.timeout_set and len(self.buffer) > 1:
+            index = random.randint(1, len(self.buffer))
+            self.buffer[index] = None
+            self.timeout_set = True
 
     def set_buffer(self, data):
         self.buffer = random_split(data)
         self.buffer.append("")
-        print(self.buffer)
 
 def random_split(data):
     data_len = len(data)

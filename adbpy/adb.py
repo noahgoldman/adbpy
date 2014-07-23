@@ -29,16 +29,19 @@ class Adb(object):
 
     @staticmethod
     def get_transport(target):
+        transport = ''
         if target in Target.__dict__.values():
-            return "host:transport-" + target
+            transport =  "-" + target
         else:
             # If the target was a serial
-            return "host:transport:" + target
+            transport = ":" + target
+        return "host:transport" + transport
 
     def setup_target(self, target):
         self.socket.send(Adb.get_transport(target))
         if self.socket.receive_fixed_length(4) != "OKAY":
-            raise AdbError("Failed to change transport")
+            raise AdbError("Failed to change transport.  Verify that multiple devices "
+                           "are not connected and that you chose the right target")
 
     def start(self):
         pass
@@ -102,8 +105,8 @@ class Adb(object):
         with self.socket.Connect():
             return self.command_bool(cmd)
 
-    def shell(self, shell_cmd, target=Target.ANY):
+    def shell(self, shell_cmd, target=Target.ANY, timeout=None):
         with self.socket.Connect():
             self.setup_target(target)
             self.socket.send("shell:" + shell_cmd)
-            return self.socket.receive_until_end()
+            return self.socket.receive_until_end(timeout)

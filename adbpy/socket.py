@@ -4,6 +4,8 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 import socket
 from contextlib import contextmanager
+import select
+import time
 
 class Socket(object):
     """Implements the socket protocol for ADB"""
@@ -97,7 +99,7 @@ class Socket(object):
         self.close()
         return data
 
-    def receive_until_end(self):
+    def receive_until_end(self, timeout=None):
         """
         Reads and blocks until the socket closes
 
@@ -107,11 +109,22 @@ class Socket(object):
         if self.receive_fixed_length(4) != "OKAY":
             raise SocketError("Socket communication failed: "
                               "the server did not return a valid response")
-        
+
+        # The time at which the receive starts
+        start_time = time.clock()
+
         output = ""
 
         while True:
-            chunk = self.socket.recv(4096).decode("ascii")
+            if timeout is not None:
+                self.socket.settimeout(timeout - (time.clock() - start_time))
+            
+            chunk = ''
+            try:
+                chunk = self.socket.recv(4096).decode("ascii")
+            except socket.timeout:
+                return output            
+
             if not chunk:
                 return output
 

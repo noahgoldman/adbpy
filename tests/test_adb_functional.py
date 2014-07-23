@@ -21,8 +21,9 @@ def adb_active():
     return True
 
 def num_devices():
-    a = Adb(DEFAULT_ADDRESS)
-    return len(a.devices())
+    if adb_active():
+        a = Adb(DEFAULT_ADDRESS)
+        return len(a.devices())
 
 @pytest.fixture
 def adb():
@@ -34,7 +35,7 @@ def adb():
     proc.start()
     return adb
 
-@pytest.mark.skipif(True, reason="Adb is not running")
+@pytest.mark.skipif(not adb_active(), reason="Adb is not running")
 class TestAdbFunctional:
 
     def test_version(self, adb):
@@ -53,6 +54,10 @@ class TestAdbFunctional:
     def test_shell(self, adb):
         data = "test"
         assert adb.shell('echo "{0}"'.format(data)) == data + "\r\n"
+
+    @pytest.mark.skipif(num_devices() != 1, reason="Only one device can be present.")
+    def test_shell_timeout(self, adb):
+        assert adb.shell('echo "hi"; sleep 0.2; echo "ho"', timeout=0.1) == "hi\r\n"
 
     @pytest.mark.skipif(num_devices() != 1, reason="Only one device can be present.")
     def test_forward(self, adb):
