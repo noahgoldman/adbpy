@@ -6,4 +6,4 @@ adbpy
 
 An python ADB client that uses the actual ADB TCP server to communicate with devices.
 
-`Documentation <http:://http://adbpy.readthedocs.org/en/latest/index.html>`_
+`Documentation <http://http://adbpy.readthedocs.org/en/latest/index.html>`_
