@@ -48,6 +48,7 @@ class Adb(object):
     def start(self):
         """
         Start the ADB server on the port specified in :py:attr:`Adb.address` during initialization.
+        Throws an error if the server doesn't actually start on the expected port.
 
         :raises: AdbError
         """
@@ -73,22 +74,39 @@ class Adb(object):
         return parse_device_list(devices)
 
     def version(self):
+        """
+        Get the version of the ADB server (for example 1.0.31).
+
+        :returns: The version of the ADB server (ex.
+        """
         with self.socket.Connect():
             return self._command("host:version")
 
     def kill(self):
+        """
+        Kill the current ADB server.
+
+        :returns: True if the ADB server was killed.
+        """
         with self.socket.Connect():
-            try:
-                return self._command_bool("host:kill")
-            except RuntimeError:
-                pass
+            return self._command_bool("host:kill")
 
     def get_product(self, target=Target.ANY):
+        """
+        Get the product name corresponding to *target*.
+
+        :returns: The product name
+        """
         cmd = host_command(target, "get-product")
         with self.socket.Connect():
             return self._command(cmd)
 
     def get_serialno(self, target=Target.ANY):
+        """
+        Get the serial number of *target*
+
+        :returns: The serial number
+        """
         cmd = host_command(target, "get-serialno")
         with self.socket.Connect():
             return self._command(cmd)
