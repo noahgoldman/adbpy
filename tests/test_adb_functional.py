@@ -31,7 +31,7 @@ def adb():
     adb = Adb(DEFAULT_ADDRESS)
     adb.kill()
 
-    proc = AdbProcess("adb")
+    proc = AdbProcess("adb", DEFAULT_ADDRESS)
     proc.start()
     return adb
 

@@ -9,10 +9,9 @@ Welcome to adbpy's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-
-.. autoclass: Adb
+    usage
 
 Indices and tables
 ==================

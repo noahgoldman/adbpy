@@ -2,7 +2,7 @@ from mock import MagicMock, patch
 import pytest
 
 from adbpy.adb import Adb
-from adbpy import Target
+from adbpy import Target, AdbError
 
 @pytest.fixture
 def adb():
@@ -11,10 +11,10 @@ def adb():
     return adb
 
 def test_get_transport():
-    assert Adb.get_transport(Target.ANY) == "host:transport-any" 
-    assert Adb.get_transport(Target.USB) == "host:transport-usb" 
-    assert Adb.get_transport(Target.EMULATOR) == "host:transport-local" 
-    assert Adb.get_transport("950a8ad5") == "host:transport:950a8ad5"
+    assert Adb._get_transport(Target.ANY) == "host:transport-any" 
+    assert Adb._get_transport(Target.USB) == "host:transport-usb" 
+    assert Adb._get_transport(Target.EMULATOR) == "host:transport-local" 
+    assert Adb._get_transport("950a8ad5") == "host:transport:950a8ad5"
 
 def test_adb_version(adb):
     adb.version()
@@ -42,10 +42,10 @@ def test_adb_get_state(adb):
     adb.socket.send.assert_called_once_with("host-local:get-state")
 
 def test_shell(adb):
-    with patch.object(Adb, "setup_target"):
+    with patch.object(Adb, "_setup_target"):
         adb.shell("ls -l")
         adb.socket.send.assert_called_once_with("shell:ls -l")
-        adb.setup_target.assert_called_once()
+        adb._setup_target.assert_called_once()
 
 def test_forward(adb):
     device_id = "950a8ad5"
@@ -68,3 +68,10 @@ def test_devices(adb):
     output = adb.devices()
 
     assert output == [("950a8ad5", "device")]
+
+def test_start(adb):
+    adb.process = MagicMock()
+    adb.process.started = MagicMock(return_value=False)
+
+    with pytest.raises(AdbError):
+        adb.start()
