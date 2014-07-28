@@ -2,9 +2,10 @@ import socket
 import random
 
 import pytest
+from mock import patch
 
 from adbpy.adb import Adb
-from adbpy import Target
+from adbpy import Target, AdbError
 from adbpy.adb_process import AdbProcess
 
 from .utils import random_ascii
@@ -37,6 +38,15 @@ def adb():
 
 @pytest.mark.skipif(not adb_active(), reason="Adb is not running")
 class TestAdbFunctional:
+
+    def test_start_adb(self, adb):
+        adb.kill()
+        adb.start()
+
+        adb.kill()
+        with patch.object(AdbProcess, "running", return_value=False):
+            with pytest.raises(AdbError):
+                adb.start()
 
     def test_version(self, adb):
         version = adb.version()

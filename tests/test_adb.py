@@ -71,7 +71,7 @@ def test_devices(adb):
 
 def test_start(adb):
     adb.process = MagicMock()
-    adb.process.started = MagicMock(return_value=False)
+    adb.process.running = MagicMock(return_value=False)
 
     with pytest.raises(AdbError):
         adb.start()

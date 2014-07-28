@@ -1,10 +1,13 @@
+from __future__ import absolute_import
+
 import subprocess
 import socket
+
+from adbpy.socket import Socket
 
 class AdbProcess(object):
 
     def __init__(self, path, address):
-        self.started = False
         self.path = path
         self.address = address
 
@@ -12,10 +15,10 @@ class AdbProcess(object):
         cmd = "{0} -P {1} start-server".format(self.path, self.address[1])
         return subprocess.call(cmd, shell=True) == 0
 
-    def started(self):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def running(self):
+        sock = Socket(self.address)
         try:
-            sock.connect(address)
+            sock.connect()
         except socket.error:
             return False
 

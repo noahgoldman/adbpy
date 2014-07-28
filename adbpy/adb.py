@@ -53,7 +53,7 @@ class Adb(object):
         :raises: AdbError
         """
         self.process.start()
-        if not self.process.started():
+        if not self.process.running():
             raise AdbError("Failed to start Adb process")
 
     def devices(self):
