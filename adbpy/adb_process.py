@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import os
 import subprocess
 import socket
 
@@ -12,8 +13,9 @@ class AdbProcess(object):
         self.address = address
 
     def start(self):
+        null = open(os.devnull, 'w')
         cmd = "{0} -P {1} start-server".format(self.path, self.address[1])
-        return subprocess.call(cmd, shell=True) == 0
+        return subprocess.call(cmd, shell=True, stdout=null) == 0
 
     def running(self):
         sock = Socket(self.address)
