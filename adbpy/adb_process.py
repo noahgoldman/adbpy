@@ -14,7 +14,7 @@ class AdbProcess(object):
 
     def start(self):
         null = open(os.devnull, 'w')
-        cmd = "{0} -P {1} start-server".format(self.path, self.address[1])
+        cmd = '"{0}" -P {1} start-server'.format(self.path, self.address[1])
         return subprocess.call(cmd, shell=True, stdout=null) == 0
 
     def running(self):

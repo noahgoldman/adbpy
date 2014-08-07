@@ -17,8 +17,8 @@ def adb_proc():
 def test_start(adb_proc):
     with patch("subprocess.call", return_value=0) as subproc:
         adb_proc.start()
-        subproc.assert_called_once_with(ADB_PATH + " -P " + str(DEFAULT_ADDRESS[1])
-                                        + " start-server", shell=True)
+        assert str(DEFAULT_ADDRESS[1]) in subproc.call_args[0][0]
+        assert "start-server" in subproc.call_args[0][0]
 
 def test_running(adb_proc):
     with patch.object(Socket, "connect", side_effect=socket.error()):
