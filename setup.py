@@ -20,7 +20,7 @@ class Tox(TestCommand):
 
 setup(
     name = "adbpy",
-    version = "0.1.2",
+    version = "0.1.3",
     url = "https://github.com/noahgoldman/adbpy",
     license = "MIT",
     author = "Noah Goldman",
